@@ -1,0 +1,27 @@
+{
+  "chip_id": "UTA-FXL20250519-MICP-CoreA",
+  "author": "JW",
+  "generated_by": "DXF generator",
+  "date": "2025-05-19 15:31:03",
+  "dimensions_mm": {
+    "chip_width": 12,
+    "chip_height": 3,
+    "design_width": 10,
+    "design_height": 1
+  },
+  "settings": {
+    "pixel_size_nm": 5,
+    "n_points": 2000,
+    "buffer_zone_width_um": 50,
+    "borehole_diameter_um": 200,
+    "conn_line_width_um": 50
+  },
+  "layers": {
+    "throats": "porous structure generated from Voronoi ridges",
+    "connections": "buffer-to-pore connectors (filled polygons)",
+    "boreholes": "injection/extraction ports",
+    "buffer": "left (HATCH) and right (LWPOLYLINE) buffer zones",
+    "junctions": "smoothed intersections (circle fill at vertices)",
+    "frame": "chip outline (for visual alignment only)"
+  }
+}

@@ -10,7 +10,7 @@
       height: 100%;
       overflow: hidden;
       background-color: #000;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
     }
 
     #svg-container {
@@ -28,30 +28,26 @@
       display: block;
     }
 
-    #controls {
-  display: none;
-}
-
     button {
-  background: #0056b3;
-  color: #fff;
-  border: 1px solid #3399ff;
-  padding: 0.4rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-}
+      background: #0056b3;
+      color: #fff;
+      border: 1px solid #3399ff;
+      padding: 0.4rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+    }
 
     button:hover {
-  background: linear-gradient(145deg, #2f4f88, #3a65b0);
-  transform: translateY(-1px);
-}
+      background: linear-gradient(145deg, #2f4f88, #3a65b0);
+      transform: translateY(-1px);
+    }
 
     #scale-bar {
       position: absolute;
@@ -86,183 +82,217 @@
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
     }
-    #svg-container.grabbing {
-    cursor: grabbing;
-  }
 
-  #svg-container svg {
-    cursor: grab;
-  }
-</style>
+    #logo-wrapper {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    #logo-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    #metadata-box {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      color: white;
+      font-size: 0.95rem;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: rgba(20, 20, 20, 0.8);
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.5rem;
+      line-height: 1.5;
+      max-width: 300px;
+      z-index: 1002;
+    }
+
+    #svg-container.grabbing {
+      cursor: grabbing;
+    }
+
+    #svg-container svg {
+      cursor: grab;
+    }
+  </style>
 </head>
 <body>
-  <div id="controls">
-    <button onclick="zoomIn()" title="Zoom In">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 5v14m-7-7h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
-    <button onclick="zoomOut()" title="Zoom Out">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M5 12h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
-        <button onclick="fitToScreen()" title="Fit to Screen">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M4 4h6v2H6v4H4V4zm16 0v6h-2V6h-4V4h6zM4 20v-6h2v4h4v2H4zm16 0h-6v-2h4v-4h2v6z" fill="white"/>
-  </svg>
-</button>
-  </div>
 
-  <div id="svg-container"></div>
+<div id="svg-container"></div>
 
-  <div id="scale-bar">
-    <span id="scale-line" style="width: 100px;"></span>
-    <span id="scale-label">100 µm</span>
-  </div>
-
-  <div id="zoom-level">Zoom: 1×</div>
-
-  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
-  <script>
-    let panZoomInstance;
-    let svgElement = null;
-    const unitsToMicrons = 1;
-
-    fetch("designs/micromodel_scaled.svg")
-      .then(response => response.text())
-      .then(svgText => {
-        document.getElementById('svg-container').innerHTML = svgText;
-        svgElement = document.querySelector('#svg-container svg');
-
-        // Ensure all shapes have at least minimal stroke visibility
-        svgElement.querySelectorAll('polyline, polygon, path, rect, circle, ellipse, line')
-          .forEach(el => {
-            if (!el.hasAttribute('stroke')) {
-              el.setAttribute('stroke', 'white');
-            }
-            if (!el.hasAttribute('stroke-width')) {
-              el.setAttribute('stroke-width', '0.2');
-            }
-          });
-
-        const viewBox = svgElement.getAttribute('viewBox');
-        if (viewBox) {
-          const [x, y, width, height] = viewBox.split(' ').map(Number);
-          const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-          rect.setAttribute("x", x);
-          rect.setAttribute("y", y);
-          rect.setAttribute("width", width);
-          rect.setAttribute("height", height);
-          rect.setAttribute("fill", "black");
-          svgElement.insertBefore(rect, svgElement.firstChild);
-        }
-
-        panZoomInstance = svgPanZoom(svgElement, {
-          beforePan: function() {
-            document.getElementById('svg-container').classList.add('grabbing');
-            return true;
-          },
-          beforeZoom: function() {
-            document.getElementById('svg-container').classList.remove('grabbing');
-            return true;
-          },
-          zoomEnabled: true,
-          controlIconsEnabled: false,
-          fit: true,
-          center: true,
-          minZoom: 0.000001,
-          maxZoom: 4000000,
-          onZoom: updateScaleBar,
-          onPan: updateScaleBar
-        });
-
-        setTimeout(updateScaleBar, 100);
-      });
-
-    function zoomIn() {
-      panZoomInstance.zoomBy(1.2);
-      updateScaleBar();
-    }
-
-    function zoomOut() {
-      panZoomInstance.zoomBy(0.8);
-      updateScaleBar();
-    }
-
-
-    function fitToScreen() {
-  panZoomInstance.fit();
-  panZoomInstance.center();
-  setTimeout(updateScaleBar, 100); // defer scale bar update
-}
-
-    function updateScaleBar() {
-      if (!svgElement) return;
-      const g = svgElement.querySelector('g');
-      if (!g) return;
-      const transform = g.getScreenCTM();
-      if (!transform) return;
-
-      const scale = transform.a;
-      const micronsPerPx = unitsToMicrons / scale;
-      const desiredPx = 100;
-      const realLengthMicrons = micronsPerPx * desiredPx;
-      const niceLengthMicrons = roundToNiceUnit(realLengthMicrons);
-      const niceLengthPx = niceLengthMicrons / micronsPerPx;
-
-      document.getElementById('scale-line').style.width = `${niceLengthPx}px`;
-      document.getElementById('scale-label').textContent = formatMicrons(niceLengthMicrons);
-      document.getElementById('zoom-level').textContent = `Zoom: ${scale.toFixed(2)}×`;
-    }
-
-    function roundToNiceUnit(value) {
-      const units = [
-        0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
-        0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50,
-        100, 200, 500, 1000, 2000, 5000, 10000
-      ];
-      for (let unit of units) {
-        if (value <= unit) return unit;
-      }
-      return value;
-    }
-
-    function formatMicrons(value) {
-      if (value >= 1000) {
-        return `${(value / 1000).toFixed(2)} mm`;
-      } else if (value < 1) {
-        return `${(value * 1000).toFixed(0)} nm`;
-      } else {
-        return `${value.toFixed(1)} µm`;
-      }
-    }
-
-    window.addEventListener('resize', () => {
-      setTimeout(updateScaleBar, 200);
-    });
-  </script>
-  <div id="logo-wrapper" style="position: absolute; top: 1rem; left: 1rem; z-index: 1001; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+<div id="logo-wrapper">
   <a href="https://www.fluidxlab.com" target="_blank" rel="noopener">
     <img src="fxl-fluidxlab-logo-animated-with-slogan.svg" alt="fluidXlab Logo" style="height: 80px;">
   </a>
-  <div id="logo-buttons" style="display: flex; flex-direction: column; gap: 0.4rem; align-items: center;">
-  <button onclick="zoomIn()" title="Zoom In">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 5v14m-7-7h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
-  <button onclick="zoomOut()" title="Zoom Out">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M5 12h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
-  <button onclick="fitToScreen()" title="Fit to Screen">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M4 4h6v2H6v4H4V4zm16 0v6h-2V6h-4V4h6zM4 20v-6h2v4h4v2H4zm16 0h-6v-2h4v-4h2v6z" fill="white"/>
-  </svg>
-</button>
+  <div id="logo-buttons">
+    <button onclick="zoomIn()" title="Zoom In">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 5v14m-7-7h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button onclick="zoomOut()" title="Zoom Out">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M5 12h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button onclick="fitToScreen()" title="Fit to Screen">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M4 4h6v2H6v4H4V4zm16 0v6h-2V6h-4V4h6zM4 20v-6h2v4h4v2H4zm16 0h-6v-2h4v-4h2v6z" fill="white"/>
+      </svg>
+    </button>
+  </div>
 </div>
+
+<div id="scale-bar">
+  <span id="scale-line" style="width: 100px;"></span>
+  <span id="scale-label">100 µm</span>
 </div>
+
+<div id="zoom-level">Zoom: 1×</div>
+<div id="metadata-box">Loading metadata…</div>
+
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script>
+  let panZoomInstance;
+  let svgElement = null;
+  const unitsToMicrons = 1;
+
+  fetch('micromodel_scaled.svg')
+    .then(response => response.text())
+    .then(svgText => {
+      document.getElementById('svg-container').innerHTML = svgText;
+      svgElement = document.querySelector('#svg-container svg');
+
+      svgElement.querySelectorAll('polyline, polygon, path, rect, circle, ellipse, line')
+        .forEach(el => {
+          if (!el.hasAttribute('stroke')) {
+            el.setAttribute('stroke', 'white');
+          }
+          if (!el.hasAttribute('stroke-width')) {
+            el.setAttribute('stroke-width', '0.2');
+          }
+        });
+
+      const viewBox = svgElement.getAttribute('viewBox');
+      if (viewBox) {
+        const [x, y, width, height] = viewBox.split(' ').map(Number);
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", width);
+        rect.setAttribute("height", height);
+        rect.setAttribute("fill", "black");
+        svgElement.insertBefore(rect, svgElement.firstChild);
+      }
+
+      panZoomInstance = svgPanZoom(svgElement, {
+        beforePan: () => {
+          document.getElementById('svg-container').classList.add('grabbing');
+          return true;
+        },
+        beforeZoom: () => {
+          document.getElementById('svg-container').classList.remove('grabbing');
+          return true;
+        },
+        zoomEnabled: true,
+        controlIconsEnabled: false,
+        fit: true,
+        center: true,
+        minZoom: 0.000001,
+        maxZoom: 4000000,
+        onZoom: updateScaleBar,
+        onPan: updateScaleBar
+      });
+
+      setTimeout(updateScaleBar, 100);
+    });
+
+  function zoomIn() {
+    panZoomInstance.zoomBy(1.2);
+    updateScaleBar();
+  }
+
+  function zoomOut() {
+    panZoomInstance.zoomBy(0.8);
+    updateScaleBar();
+  }
+
+  function fitToScreen() {
+    panZoomInstance.fit();
+    panZoomInstance.center();
+    setTimeout(updateScaleBar, 100);
+  }
+
+  function updateScaleBar() {
+    if (!svgElement) return;
+    const g = svgElement.querySelector('g');
+    if (!g) return;
+    const transform = g.getScreenCTM();
+    if (!transform) return;
+
+    const scale = transform.a;
+    const micronsPerPx = unitsToMicrons / scale;
+    const desiredPx = 100;
+    const realLengthMicrons = micronsPerPx * desiredPx;
+    const niceLengthMicrons = roundToNiceUnit(realLengthMicrons);
+    const niceLengthPx = niceLengthMicrons / micronsPerPx;
+
+    document.getElementById('scale-line').style.width = `${niceLengthPx}px`;
+    document.getElementById('scale-label').textContent = formatMicrons(niceLengthMicrons);
+    document.getElementById('zoom-level').textContent = `Zoom: ${scale.toFixed(2)}×`;
+  }
+
+  function roundToNiceUnit(value) {
+    const units = [
+      0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
+      0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50,
+      100, 200, 500, 1000, 2000, 5000, 10000
+    ];
+    for (let unit of units) {
+      if (value <= unit) return unit;
+    }
+    return value;
+  }
+
+  function formatMicrons(value) {
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(2)} mm`;
+    } else if (value < 1) {
+      return `${(value * 1000).toFixed(0)} nm`;
+    } else {
+      return `${value.toFixed(1)} µm`;
+    }
+  }
+
+  fetch('micromodel_metadata.json')
+    .then(response => response.json())
+    .then(data => {
+      const md = document.getElementById('metadata-box');
+      md.innerHTML = `
+        <strong>Micromodel Metadata</strong><br>
+        📄 <b>chip_id:</b> ${data.chip_id}<br>
+        👤 <b>author:</b> ${data.author}<br>
+        🕒 <b>generated:</b> ${data.date}<br>
+        📐 <b>chip size:</b> ${data.dimensions_mm.chip_width} × ${data.dimensions_mm.chip_height} mm<br>
+        🧩 <b>design area:</b> ${data.dimensions_mm.design_width} × ${data.dimensions_mm.design_height} mm<br>
+        🔧 <b>pixel size:</b> ${data.settings.pixel_size_nm} nm<br>
+        💡 <b>n_points:</b> ${data.settings.n_points}
+      `;
+    });
+
+  window.addEventListener('resize', () => {
+    setTimeout(updateScaleBar, 200);
+  });
+</script>
+
 </body>
 </html>
