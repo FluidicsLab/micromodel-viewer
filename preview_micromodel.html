@@ -166,7 +166,7 @@
   let svgElement = null;
   const unitsToMicrons = 1;
 
-  fetch('micromodel_scaled.svg')
+  fetch('designs/micromodel_scaled.svg')
     .then(response => response.text())
     .then(svgText => {
       document.getElementById('svg-container').innerHTML = svgText;
