@@ -51,7 +51,7 @@ These are used to assign depth during chip generation.
 
 ## 5. Synthetic Network Generation
 
-- Generate 500 random seed points over a 3 mm × 2 mm region  
+- Generate random seed points
 - Apply 2D Voronoi tessellation  
 - Treat each ridge as a pore throat  
 - Clip throats to design boundaries  

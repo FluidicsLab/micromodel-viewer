@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Micromodel Viewer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="svg-container"></div>
+
+<div id="logo-wrapper">
+  <a href="https://www.fluidxlab.com" target="_blank" rel="noopener">
+    <img src="assets/fxl-fluidxlab-logo-animated-with-slogan.svg" alt="fluidXlab Logo" style="height: 80px;">
+  </a>
+  <img src="assets/longhorn-logo-transparent.png" alt="Longhorn Logo" style="height: 60px; margin-top: -0.4rem; opacity: 0.95;">
+  <div id="logo-buttons">
+    <button onclick="zoomIn()" title="Zoom In">+</button>
+    <button onclick="zoomOut()" title="Zoom Out">−</button>
+    <button onclick="fitToScreen()" title="Fit to Screen">⤢</button>
+  </div>
+</div>
+
+<div id="scale-bar">
+  <span id="scale-line" style="width: 100px;"></span>
+  <span id="scale-label">100 µm</span>
+</div>
+
+<div id="zoom-level">Zoom: 1×</div>
+
+<div id="metadata-box">Loading metadata…</div>
+
+<div id="legend-box">
+  <strong style="color: white;">Edge Depth Legend</strong><br>
+  <div id="legend-entries">Loading…</div>
+</div>
+
+<div id="description-box">
+  <strong>Design Description</strong>
+  <div id="design-description">Loading...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script src="js/viewer.js"></script>
+
+</body>
+</html>

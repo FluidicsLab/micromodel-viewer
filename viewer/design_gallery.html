@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Micromodel Design Gallery</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background-color: #101010;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .card a {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #0056b3;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s ease;
+    }
+    .card a:hover {
+      background: linear-gradient(145deg, #2f4f88, #3a65b0);
+    }
+    .thumbnail {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #ffffff;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Micromodel Design Gallery</h1>
+  <div class="gallery" id="designGallery"></div>
+
+  <script>
+    const designs = [
+      {
+        id: "FXL250527-UTA001",
+        name: "Test Design 1",
+        thumb: "designs/FXL250527-UTA001/micromodel_scaled.svg"
+      },
+      {
+        id: "FXL250528-UTA002",
+        name: "Test Design 2",
+        thumb: "designs/FXL250528-UTA002/micromodel_scaled.svg"
+      }
+      // Add more entries as needed
+    ];
+
+    const container = document.getElementById('designGallery');
+    designs.forEach(design => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const img = document.createElement('img');
+      img.src = design.thumb;
+      img.alt = design.id;
+      img.className = 'thumbnail';
+      card.appendChild(img);
+
+      const title = document.createElement('h2');
+      title.textContent = design.name;
+      card.appendChild(title);
+
+      const link = document.createElement('a');
+      link.href = `index.html?design=${design.id}`;
+      link.textContent = "View Design";
+      card.appendChild(link);
+
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>

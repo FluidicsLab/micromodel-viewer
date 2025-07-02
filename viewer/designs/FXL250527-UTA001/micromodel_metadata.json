@@ -1,0 +1,34 @@
+{
+  "chip_id": "FXL250527-UTA001",
+  "author": "JW",
+  "generated_by": "fluidXlab designer",
+  "date": "2025-05-27 10:00:00",
+  "dimensions_mm": {
+    "chip_width": 15,
+    "chip_height": 10,
+    "design_width": 10,
+    "design_height": 3
+  },
+  "settings": {
+    "n_points": 4000,
+    "buffer_zone_width_um": 50,
+    "borehole_diameter_um": 200,
+    "conn_line_width_um": 50,
+    "throat_line_width_um": 10.0
+  },
+  "layers": {
+    "throats": "porous structure generated from Voronoi ridges",
+    "connections": "buffer-to-pore connectors (filled polygons)",
+    "boreholes": "injection/extraction ports",
+    "junctions": "smoothed intersections (circle fill at vertices (white color))",
+    "frame": "chip outline (for visual alignment only)"
+  },
+  "metrics": {
+    "porosity": "N.A.",
+    "tortuosity": "N.A.",
+    "permeability": {
+      "value": "N.A.",
+      "unit": "m\u00b2"
+    }
+  }
+}
