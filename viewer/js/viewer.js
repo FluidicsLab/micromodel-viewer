@@ -119,3 +119,30 @@ fetch(`${basePath}description.md`)
     console.error('Failed to load Markdown:', error);
     document.getElementById('design-description').innerText = '⚠️ Unable to load description.';
   });
+
+// Settings toggle and actions
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('settings-toggle');
+  const panel = document.getElementById('settings-panel');
+  const colorPicker = document.getElementById('background-color-picker');
+
+  if (toggle && panel) {
+    toggle.addEventListener('click', () => {
+      panel.classList.toggle('visible');
+    });
+  }
+
+  if (colorPicker) {
+    colorPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      document.getElementById('svg-container').style.backgroundColor = color;
+    });
+  }
+});
+
+
+// Background color picker
+document.getElementById('background-color-picker').addEventListener('input', (e) => {
+  const color = e.target.value;
+  document.getElementById('svg-container').style.backgroundColor = color;
+});
