@@ -1,5 +1,3 @@
-# fixed_micp2micromodel_dxf_layered.py (user-defined layer properties: depth, points, line width + per-layer color)
-
 import numpy as np
 from scipy.spatial import Voronoi
 import ezdxf
@@ -21,16 +19,24 @@ borehole_offset_um = 500
 buffer_zone_width_um = 10
 conn_line_width_um = 10
 
-region_map_file = "throat_region_mapping.json"
-output_dxf_file = "micromodel_design.dxf"
-metrics_file = "micromodel_metrics.json"
-depth_color_file = "../depth_to_color_map.json"
+region_map_file = "../viewer/designs/FXL250703-UTA001/throat_region_mapping.json"
+output_dxf_file = "../viewer/designs/FXL250703-UTA001/micromodel_design.dxf"
+metrics_file = "../viewer/designs/FXL250703-UTA001/micromodel_metrics.json"
+depth_color_file = "../viewer/designs/FXL250703-UTA001/depth_to_color_map.json"
+
+# === USER SWITCH ===
+layering_mode = 'vertical'  # 'horizontal' or 'vertical'
 
 # === USER-DEFINED LAYER PROPERTIES ===
 layer_properties = [
-    {"depth_nm": 300, "n_points": 250, "width_um": 0.6},
-    {"depth_nm": 300, "n_points": 250, "width_um": 0.45},
-    {"depth_nm": 300, "n_points": 250, "width_um": 0.3}
+    {"depth_nm": 300, "n_points": 250, "width_um": 0.9},
+    {"depth_nm": 300, "n_points": 400, "width_um": 0.6},
+    {"depth_nm": 300, "n_points": 500, "width_um": 0.3},
+    {"depth_nm": 300, "n_points": 600, "width_um": 0.6},
+    {"depth_nm": 300, "n_points": 700, "width_um": 1},
+    {"depth_nm": 300, "n_points": 800, "width_um": 2},
+    {"depth_nm": 300, "n_points": 1000, "width_um": 3}
+
 ]
 n_layers = len(layer_properties)
 
@@ -44,17 +50,30 @@ offset_y = (chip_height_px - height_px) // 2
 
 # === LAYERED POINT GENERATION ===
 np.random.seed(42)
-layer_bounds = np.linspace(0, height_px, n_layers + 1)
 points = []
 layer_tags = []
-for i, props in enumerate(layer_properties):
-    y_min, y_max = layer_bounds[i], layer_bounds[i + 1]
-    layer_pts = np.column_stack((
-        np.random.uniform(0, width_px, props["n_points"]),
-        np.random.uniform(y_min, y_max, props["n_points"])
-    ))
-    points.append(layer_pts)
-    layer_tags.extend([i] * props["n_points"])
+
+if layering_mode == 'horizontal':
+    layer_bounds = np.linspace(offset_y, offset_y + height_px, n_layers + 1)
+    for i, props in enumerate(layer_properties):
+        y_min, y_max = layer_bounds[i], layer_bounds[i + 1]
+        layer_pts = np.column_stack((
+            np.random.uniform(offset_x, offset_x + width_px, props["n_points"]),
+            np.random.uniform(y_min, y_max, props["n_points"])
+        ))
+        points.append(layer_pts)
+        layer_tags.extend([i] * props["n_points"])
+else:
+    layer_bounds = np.linspace(offset_x, offset_x + width_px, n_layers + 1)
+    for i, props in enumerate(layer_properties):
+        x_min, x_max = layer_bounds[i], layer_bounds[i + 1]
+        layer_pts = np.column_stack((
+            np.random.uniform(x_min, x_max, props["n_points"]),
+            np.random.uniform(offset_y, offset_y + height_px, props["n_points"])
+        ))
+        points.append(layer_pts)
+        layer_tags.extend([i] * props["n_points"])
+
 points = np.vstack(points)
 layer_tags = np.array(layer_tags)
 
@@ -69,15 +88,16 @@ layer_indices = []
 
 for (i, j) in vor.ridge_vertices:
     if -1 in (i, j): continue
-    v1 = vor.vertices[i] + [offset_x, offset_y]
-    v2 = vor.vertices[j] + [offset_x, offset_y]
+    v1 = vor.vertices[i]
+    v2 = vor.vertices[j]
     seg = LineString([v1, v2]).intersection(bbox)
     if not seg.is_empty:
-        mid_y = np.mean([v1[1], v2[1]])
+        mid = np.mean([v1[0], v2[0]]) if layering_mode == 'vertical' else np.mean([v1[1], v2[1]])
         for s in seg.geoms if isinstance(seg, MultiLineString) else [seg]:
             throat_lines.append(np.array(s.coords))
             ridge_vertices.append((i, j))
-            layer_idx = min(max(np.searchsorted(layer_bounds, (mid_y - offset_y), side='right') - 1, 0), n_layers - 1)
+            bounds = np.linspace(offset_x, offset_x + width_px, n_layers + 1) if layering_mode == 'vertical' else np.linspace(offset_y, offset_y + height_px, n_layers + 1)
+            layer_idx = min(max(np.searchsorted(bounds, mid, side='right') - 1, 0), n_layers - 1)
             layer_indices.append(layer_idx)
 
 # === WRITE DXF AND JSON ===
@@ -132,7 +152,7 @@ for idx, coords in enumerate(throat_lines):
     depths_um.append(d_um)
     widths_um.append(w_um)
 
-# === ADD JUNCTIONS ===
+# === JUNCTIONS ===
 for idx, widths in vertex_diam_map.items():
     if len(widths) < 3: continue
     max_width = max(widths)
@@ -233,8 +253,8 @@ porosity = total_pore_volume_um3 / design_volume_um3
 # === GRAPH AND PERMEABILITY ===
 G = nx.Graph()
 for idx, v in enumerate(vor.vertices):
-    x, y = v + [offset_x, offset_y]
-    G.add_node(idx, pos=(x * pixel_size_um, y * pixel_size_um))
+    x, y = v
+    G.add_node(idx, pos=((x + offset_x) * pixel_size_um, (y + offset_y) * pixel_size_um))
 for i, j in ridge_vertices:
     if i == -1 or j == -1: continue
     p1 = vor.vertices[i] + [offset_x, offset_y]

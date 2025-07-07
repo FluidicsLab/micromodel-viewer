@@ -185,10 +185,6 @@ button:hover {
 }
 
 #settings-toggle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1005;
   font-size: 1.2rem;
   background: #333;
   color: white;
@@ -206,8 +202,9 @@ button:hover {
 
 #settings-panel {
   position: absolute;
-  top: 4rem;
-  right: 1rem;
+  top: auto;
+  left: 4.5rem;
+  bottom: 1rem;
   background: rgba(20, 20, 20, 0.9);
   color: white;
   padding: 1rem;

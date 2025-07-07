@@ -4,50 +4,62 @@
   <meta charset="UTF-8">
   <title>Micromodel Viewer</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hidden { display: none !important; }
+    #settings-panel {
+      position: absolute;
+      left: 1rem;
+      top: auto;
+      bottom: 1rem;
+      background: #1e1e1e;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    #settings-panel h3 {
+      margin-top: 0;
+    }
+  </style>
 </head>
 <body>
 
 <div id="svg-container"></div>
 
-<div id="logo-wrapper">
-  <a href="https://www.fluidxlab.com" target="_blank" rel="noopener">
-    <img src="assets/fxl-fluidxlab-logo-animated-with-slogan.svg" alt="fluidXlab Logo" style="height: 80px;">
-  </a>
+<!-- Logo and controls -->
+<div id="logo-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem;">
+  <img src="assets/fxl-fluidxlab-logo-animated-with-slogan.svg" alt="fluidXlab Logo" style="height: 80px;">
   <img src="assets/longhorn-logo-transparent.png" alt="Longhorn Logo" style="height: 60px; margin-top: -0.4rem; opacity: 0.95;">
-  <div id="logo-buttons">
-    <button onclick="zoomIn()" title="Zoom In">+</button>
-    <button onclick="zoomOut()" title="Zoom Out">−</button>
-    <button onclick="fitToScreen()" title="Fit to Screen">⤢</button>
+  <div id="logo-buttons" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <button onclick="zoomIn()" title="Zoom In">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+    </button>
+    <button onclick="zoomOut()" title="Zoom Out">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
+    </button>
+    <button onclick="fitToScreen()" title="Fit to Screen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H7v5zm10-5h-3v2h3v3h2V5h-2zm0 14h-3v2h5v-5h-2v3z"/></svg>
+    </button>
+    <button id="color-toggle" title="Toggle Color Mode">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M9.37 5.51a7 7 0 1 0 9.12 9.12A9 9 0 1 1 9.37 5.51Z"/>
+  </svg>
+</button>
+    <button id="info-toggle" title="Toggle Info">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-1 4h2v7h-2v-7z"/>
+  </svg>
+</button>
+    <button id="settings-toggle" title="Settings">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.43 12.98c.04-.32.07-.66.07-1s-.03-.68-.07-1l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a8.27 8.27 0 0 0-1.73-1L15 2.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0-.5.5L9.17 5a8.27 8.27 0 0 0-1.73 1l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.66-.07 1s.03.68.07 1l-2.11 1.65a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .61.22l2.49-1a8.27 8.27 0 0 0 1.73 1l.33 2.5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5l.33-2.5a8.27 8.27 0 0 0 1.73-1l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z"/>
+  </svg>
+</button>
   </div>
 </div>
 
-<div id="scale-bar">
-  <span id="scale-line" style="width: 100px;"></span>
-  <span id="scale-label">100 µm</span>
-</div>
-
-<div id="zoom-level">Zoom: 1×</div>
-
-<div id="metadata-box">Loading metadata…</div>
-
-<div id="legend-box">
-  <strong style="color: white;">Edge Depth Legend</strong><br>
-  <div id="legend-entries">Loading…</div>
-</div>
-
-<div id="description-box">
-  <strong>Design Description</strong>
-  <div id="design-description">Loading...</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
-<script src="js/viewer.js"></script>
-
-<!-- Settings Button -->
-<button id="settings-toggle" title="Settings">⚙️</button>
-
-<!-- Settings Panel -->
+<!-- Settings -->
 <div id="settings-panel" class="hidden">
   <h3>Viewer Settings</h3>
   <label>
@@ -56,6 +68,34 @@
   </label>
 </div>
 
+<!-- Metadata -->
+<div id="metadata-box">Loading metadata…</div>
+
+<!-- Legend -->
+<div id="legend-box">
+  <strong style="color: white;">Edge Depth</strong><br>
+  <div id="legend-entries">Loading…</div>
+</div>
+
+<!-- Zoom info -->
+<div id="zoom-level">Zoom: 1×</div>
+
+<!-- Scale bar -->
+<div id="scale-bar">
+  <span id="scale-line" style="width: 100px;"></span>
+  <span id="scale-label">100 µm</span>
+</div>
+
+<!-- Description -->
+<div id="description-box">
+  <strong>Design Description</strong>
+  <div id="design-description">Loading…</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script src="js/viewer.js"></script>
 
 </body>
 </html>

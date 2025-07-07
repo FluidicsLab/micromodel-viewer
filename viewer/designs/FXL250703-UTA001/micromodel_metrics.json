@@ -1,0 +1,15 @@
+{
+  "porosity": 0.09722564114315999,
+  "total_pore_volume_um3": 87503.07702884398,
+  "design_volume_um3": 900000.0,
+  "max_depth_um": 0.3,
+  "effective_depth_um": 0.3,
+  "tortuosity_estimate": 1.4369378722236579,
+  "permeability_um2": 9.830611621876288e-06,
+  "permeability_m2": 9.830611621876288e-18,
+  "permeability_mD": 0.009961102058847187,
+  "permeability_nD": 9961.102058847186,
+  "pixel_size_nm": 10,
+  "design_width_um": 3000,
+  "design_height_um": 1000
+}

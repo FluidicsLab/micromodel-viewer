@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Micromodel Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #101010;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+    #svg-container {
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    button {
+      background: #0056b3;
+      color: #fff;
+      border: 1px solid #3399ff;
+      padding: 0.4rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+    }
+    button:hover {
+      background: linear-gradient(145deg, #2f4f88, #3a65b0);
+      transform: translateY(-1px);
+    }
+    #scale-bar {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      color: white;
+      font-size: 0.85rem;
+      background: rgba(20, 20, 20, 0.75);
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #scale-line {
+      height: 2px;
+      background: white;
+      display: inline-block;
+      transition: width 0.2s ease;
+    }
+    #zoom-level {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      transform: translateY(-120%);
+      color: white;
+      font-size: 0.75rem;
+      font-family: monospace;
+      background: rgba(20, 20, 20, 0.75);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    #logo-wrapper {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    #logo-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    #metadata-box {
+      position: absolute;
+      bottom: 5rem;
+      left: 1rem;
+      color: white;
+      font-size: 0.95rem;
+      background: rgba(20, 20, 20, 0.8);
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.5rem;
+      line-height: 1.5;
+      max-width: 300px;
+      z-index: 1002;
+    }
+
+    #legend-box {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 20, 0.8);
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      color: white;
+      font-size: 0.85rem;
+      z-index: 1003;
+      text-align: left;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+    .legend-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+    }
+    .legend-entry::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background-color: var(--legend-color);
+      border-radius: 3px;
+      display: inline-block;
+    }
+    #svg-container.grabbing {
+      cursor: grabbing;
+    }
+    #svg-container svg {
+      cursor: grab;
+    }
+#description-box {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  width: 400px;
+  overflow-y: auto;
+  background: rgba(20, 20, 20, 0.9);
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: white;
+  z-index: 1002;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1c1c1c;
+}
+
+
+
+#description-box::-webkit-scrollbar {
+  width: 6px;
+}
+#description-box::-webkit-scrollbar-track {
+  background: #1c1c1c;
+}
+#description-box::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 3px;
+}
+
+#description-box strong {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+#design-description {
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.5;
+  color: #ccc;
+}
+
+  </style>
+</head>
+<body>
+
+<div id="svg-container"></div>
+
+<div id="logo-wrapper">
+  <a href="https://www.fluidxlab.com" target="_blank" rel="noopener">
+    <img src="fxl-fluidxlab-logo-animated-with-slogan.svg" alt="fluidXlab Logo" style="height: 80px;">
+  </a>
+  <img src="longhorn-logo-transparent.png" alt="Longhorn Logo" style="height: 60px; margin-top: -0.4rem; opacity: 0.95;">
+  </a>
+  <div id="logo-buttons">
+    <button onclick="zoomIn()" title="Zoom In">+</button>
+    <button onclick="zoomOut()" title="Zoom Out">−</button>
+    <button onclick="fitToScreen()" title="Fit to Screen">⤢</button>
+  </div>
+</div>
+
+<div id="scale-bar">
+  <span id="scale-line" style="width: 100px;"></span>
+  <span id="scale-label">100 µm</span>
+</div>
+
+<div id="zoom-level">Zoom: 1×</div>
+
+<div id="metadata-box">Loading metadata…</div>
+
+<div id="legend-box">
+  <strong style="color: white;">Edge Depth Legend</strong><br>
+  <div id="legend-entries">Loading…</div>
+</div>
+
+<div id="description-box">
+  <strong>Design Description</strong>
+  <div id="design-description">Loading...</div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script>
+let panZoomInstance;
+let svgElement = null;
+const unitsToMicrons = 1;
+
+fetch('depth_to_color_map.json')
+  .then(r => r.json())
+  .then(map => {
+    const container = document.getElementById('legend-entries');
+    container.innerHTML = "";
+    Object.keys(map).map(Number).sort((a,b)=>a-b).forEach(depth => {
+      const color = map[depth];
+      const entry = document.createElement('div');
+      entry.className = 'legend-entry';
+      entry.style.setProperty('--legend-color', color);
+      entry.textContent = `${depth} nm`;
+      container.appendChild(entry);
+    });
+  });
+
+fetch('designs/micromodel_scaled.svg')
+  .then(response => response.text())
+  .then(svgText => {
+    document.getElementById('svg-container').innerHTML = svgText;
+    svgElement = document.querySelector('#svg-container svg');
+    panZoomInstance = svgPanZoom(svgElement, {
+      zoomEnabled: true,
+      controlIconsEnabled: false,
+      fit: true,
+      center: true,
+      minZoom: 0.000001,
+      maxZoom: 4000000,
+      onZoom: updateScaleBar,
+      onPan: updateScaleBar
+    });
+    setTimeout(updateScaleBar, 100);
+  });
+
+function zoomIn() {
+  panZoomInstance.zoomBy(1.2);
+  updateScaleBar();
+}
+function zoomOut() {
+  panZoomInstance.zoomBy(0.8);
+  updateScaleBar();
+}
+function fitToScreen() {
+  panZoomInstance.fit();
+  panZoomInstance.center();
+  setTimeout(updateScaleBar, 100);
+}
+function updateScaleBar() {
+  if (!svgElement) return;
+  const g = svgElement.querySelector('g');
+  if (!g) return;
+  const transform = g.getScreenCTM();
+  if (!transform) return;
+  const scale = transform.a;
+  const micronsPerPx = unitsToMicrons / scale;
+  const desiredPx = 100;
+  const realLengthMicrons = micronsPerPx * desiredPx;
+  const niceLengthMicrons = roundToNiceUnit(realLengthMicrons);
+  const niceLengthPx = niceLengthMicrons / micronsPerPx;
+  document.getElementById('scale-line').style.width = `${niceLengthPx}px`;
+  document.getElementById('scale-label').textContent = formatMicrons(niceLengthMicrons);
+  document.getElementById('zoom-level').textContent = `Zoom: ${scale.toFixed(2)}×`;
+}
+function roundToNiceUnit(value) {
+  const units = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
+    1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+  for (let unit of units) {
+    if (value <= unit) return unit;
+  }
+  return value;
+}
+function formatMicrons(value) {
+  if (value >= 1000) return `${(value / 1000).toFixed(2)} mm`;
+  if (value < 1) return `${(value * 1000).toFixed(0)} nm`;
+  return `${value.toFixed(1)} µm`;
+}
+
+fetch('micromodel_metadata.json')
+  .then(response => response.json())
+  .then(data => {
+    const md = document.getElementById('metadata-box');
+
+    // Helper for safe display of metric
+    const safeMetric = (value, unit = "") => {
+      return (typeof value === "number")
+        ? `${value.toExponential(2)} ${unit}`
+        : (value === "N.A." ? "N.A." : "–");
+    };
+
+    md.innerHTML = `
+      <strong>Draft Design Metadata</strong><br>
+      <b>chip_id:</b> ${data.chip_id}<br>
+      <b>author:</b> ${data.author}<br>
+      <b>generated:</b> ${data.date}<br>
+      <b>chip size:</b> ${data.dimensions_mm.chip_width} × ${data.dimensions_mm.chip_height} mm<br>
+      <b>design area:</b> ${data.dimensions_mm.design_width} × ${data.dimensions_mm.design_height} mm<br>
+      <b>n_points:</b> ${data.settings.n_points}<br>
+      ${data.metrics ? `
+        <b>porosity:</b> ${typeof data.metrics.porosity === "number" ? data.metrics.porosity.toFixed(3) : "N.A."}<br>
+        <b>tortuosity:</b> ${typeof data.metrics.tortuosity === "number" ? data.metrics.tortuosity.toFixed(3) : "N.A."}<br>
+        <b>permeability:</b> ${safeMetric(data.metrics.permeability?.value, data.metrics.permeability?.unit)}
+      ` : ''}
+    `;
+  });
+
+fetch('description.md')
+  .then(response => response.text())
+  .then(markdown => {
+    const html = marked.parse(markdown);
+    document.getElementById('design-description').innerHTML = html;
+  })
+  .catch(error => {
+    console.error('Failed to load Markdown:', error);
+    document.getElementById('design-description').innerText = '⚠️ Unable to load description.';
+  });
+
+</script>
+
+</body>
+</html>

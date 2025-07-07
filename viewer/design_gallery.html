@@ -67,40 +67,43 @@
 
   <script>
     const designs = [
-      {
-        id: "FXL250527-UTA001",
-        name: "Test Design 1",
-        thumb: "designs/FXL250527-UTA001/micromodel_scaled.svg"
-      },
-      {
-        id: "FXL250528-UTA002",
-        name: "Test Design 2",
-        thumb: "designs/FXL250528-UTA002/micromodel_scaled.svg"
-      }
-      // Add more entries as needed
+      { id: "FXL250703-UTA003"},
+      {id: "FXL250703-UTA001" }
     ];
 
     const container = document.getElementById('designGallery');
-    designs.forEach(design => {
-      const card = document.createElement('div');
-      card.className = 'card';
 
-      const img = document.createElement('img');
-      img.src = design.thumb;
-      img.alt = design.id;
-      img.className = 'thumbnail';
-      card.appendChild(img);
+    designs.forEach(async ({ id }) => {
+      try {
+        const metadataResp = await fetch(`designs/${id}/micromodel_metadata.json`);
+        if (!metadataResp.ok) throw new Error('Metadata missing');
+        const metadata = await metadataResp.json();
 
-      const title = document.createElement('h2');
-      title.textContent = design.name;
-      card.appendChild(title);
+        const card = document.createElement('div');
+        card.className = 'card';
 
-      const link = document.createElement('a');
-      link.href = `index.html?design=${design.id}`;
-      link.textContent = "View Design";
-      card.appendChild(link);
+        const img = document.createElement('img');
+        img.src = `designs/${id}/micromodel_scaled_depth.svg`;
+        img.alt = id;
+        img.className = 'thumbnail';
+        img.onerror = () => {
+          img.style.display = 'none';
+        };
+        card.appendChild(img);
 
-      container.appendChild(card);
+        const title = document.createElement('h2');
+        title.textContent = metadata.chip_id || id;
+        card.appendChild(title);
+
+        const link = document.createElement('a');
+        link.href = `index.html?design=${id}`;
+        link.textContent = "View Design";
+        card.appendChild(link);
+
+        container.appendChild(card);
+      } catch (err) {
+        console.warn(`Skipping ${id}:`, err);
+      }
     });
   </script>
 </body>
